@@ -1,0 +1,31 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+- main
+
+stages:
+  - stage: Build
+    displayName: Built Stage
+    jobs:
+    - job: Build
+      displayName: Build Job
+      pool:
+        vmImage: 'ubuntu-latest'
+      steps:
+        - bash: echo Contents in System Default Working Directory; ls -R $(System.DefaultWorkingDirectory) 
+        - bash: echo Before copying Contents in Build Artifact Directory; ls -R 
+        - task: CopyFiles@2
+          inputs:
+            SourceFolder: '$(System.DefaultWorkingDirectory)/terraform-manifests'
+            Contents: '**'
+            TargetFolder: '$(Build.ArtifactStagingDirectory)'
+            OverWrite: true
+        - bash: echo After copying to Build Artifact Directory; ls -R $(Build.ArtifactStagingDirectory) 
+        - task:PublishBuildArtifacts@1
+          inputs: 
+            PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+            ArtifactName: 'terraform-manifests'
+            publishLocation: 'Container' 
